@@ -1,11 +1,16 @@
-const multiple = () => Math.floor(Math.random() * 4) + 2;
+
+const multiple = () => 100 + Math.floor(Math.random() * 400);
 
 // Enemies our player must avoid
-const Enemy = function (x_coord, y_coord) {
+const Enemy = function (x_coord, y_coord, player) {
    // Variables applied to each of our instances go here,
    // we've provided one for you to get started
    this.x = x_coord;
    this.y = y_coord;
+
+   // we pass our player object here so we can access it's
+   // x and y postion when checking for collisions.
+   this.player = player;
 
    this.speedFactor = multiple();
    // The image/sprite for our enemies, this uses
@@ -20,10 +25,17 @@ Enemy.prototype.update = function (dt) {
    // which will ensure the game runs at the same speed for
    // all computers.
    if (this.x < 505) {
-      this.x = this.x + (1 * this.speedFactor)
+      this.x = this.x + (dt * this.speedFactor);
    } else {
       this.speedFactor = multiple();
       this.x = 0;
+   }
+
+   // checks for collisions here;
+   if (this.y - player.y > -12 && this.y - player.y < 12) {
+      if (player.x - 25 < this.x && player.x + 25 > this.x) {
+         player.reset();
+      }
    }
 };
 
@@ -42,26 +54,26 @@ const Player = function (x_coord, y_coord) {
    this.sprite = 'images/char-boy.png';
 };
 
-Player.prototype.update = function (dt) { 
-   // check for collisions?!?
+Player.prototype.reset = function (dt, new_x, new_y) {
+   this.x = 202;
+   this.y = 404;
 };
 
 Player.prototype.handleInput = function (key) {
-   switch(key) {
+   switch (key) {
       case 'left':
-         if(this.x > 0) this.x -= 101;
+         if (this.x > 0) this.x -= 101;
          break;
       case 'up':
-         if(this.y > 0) this.y -= 84;
+         if (this.y > 0) this.y -= 84;
          break;
       case 'right':
-         if(this.x < 404) this.x += 101;
+         if (this.x < 404) this.x += 101;
          break;
       case 'down':
-         if(this.y < 404) this.y += 84;
+         if (this.y < 404) this.y += 84;
          break;
    }
-   console.log(' x : ', this.x, ' y : ', this.y);
 };
 
 Player.prototype.render = function () {
@@ -71,14 +83,13 @@ Player.prototype.render = function () {
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-const allEnemies = [new Enemy(0, 65), new Enemy(0, 145), new Enemy(0, 225)];
 const player = new Player(202, 404);
-
+const allEnemies = [new Enemy(0, 62, player), new Enemy(0, 144, player), new Enemy(0, 226, player)];
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
 document.addEventListener('keyup', function (e) {
-   var allowedKeys = {
+   const allowedKeys = {
       37: 'left',
       38: 'up',
       39: 'right',
